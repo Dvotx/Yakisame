@@ -49,8 +49,6 @@ body {
     gap: 20px;
     max-width: 1200px;
     margin: 0 auto;
-}
-    margin: 0 auto;
     padding-bottom: 15px;
 }
 
@@ -219,12 +217,33 @@ body {
 /* ===== CONTAINER DE PRODUTOS ===== */
 .container-produtos {
     display: flex;
-    flex-wrap: wrap;
     gap: 20px;
-    justify-content: center;
     padding: 20px;
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Estilizar a barra de rolagem */
+.container-produtos::-webkit-scrollbar {
+    height: 10px;
+}
+
+.container-produtos::-webkit-scrollbar-track {
+    background: var(--cinza-escuro);
+    border-radius: 10px;
+}
+
+.container-produtos::-webkit-scrollbar-thumb {
+    background: var(--dourado);
+    border-radius: 10px;
+}
+
+.container-produtos::-webkit-scrollbar-thumb:hover {
+    background: var(--dourado-claro);
 }
 
 /* Cards dos Produtos */
@@ -237,6 +256,7 @@ body {
     color: var(--preto);
     padding: 0;
     width: 220px;
+    min-width: 220px;
     min-height: 250px;
     font-family: 'Segoe UI', Arial, sans-serif;
     border-radius: 15px;
@@ -252,6 +272,7 @@ body {
     align-items: center;
     border: 2px solid transparent;
     position: relative;
+    flex-shrink: 0;
 }
 
 /* Badge de Promoção */
@@ -269,6 +290,40 @@ body {
     z-index: 10;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* Badge Ano Novo */
+.badge-ano-novo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #1E3A8A;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
+    z-index: 10;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: glow-badge 2s ease-in-out infinite;
+}
+
+@keyframes glow-badge {
+    0%, 100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6); }
+    50% { box-shadow: 0 4px 25px rgba(255, 215, 0, 1); }
+}
+
+/* Preço Destaque */
+.preco-destaque {
+    color: #059669;
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin: 10px 0;
+    padding: 5px 10px;
+    background: rgba(5, 150, 105, 0.1);
+    border-radius: 8px;
 }
 
 /* Efeito premium de brilho */
