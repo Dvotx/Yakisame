@@ -214,6 +214,21 @@ body {
     border-color: var(--dourado);
 }
 
+/* ===== SEÇÃO DE CATEGORIA ===== */
+.secao-categoria {
+    margin-bottom: 40px;
+    padding: 0 20px;
+}
+
+.titulo-categoria {
+    color: var(--dourado);
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    border-left: 4px solid var(--dourado);
+    font-weight: 600;
+}
+
 /* ===== CONTAINER DE PRODUTOS ===== */
 .container-produtos {
     display: flex;
