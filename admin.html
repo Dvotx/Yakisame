@@ -469,11 +469,47 @@
         // Buscar imagem do Mercado Livre
         async function buscarImagemMercadoLivre(url) {
             try {
-                // Extrai o ID do produto (MLB-xxxxxxx)
-                const mlbMatch = url.match(/ML[A-Z]-\d+/i);
+                // Primeiro tenta extrair MLB do link direto
+                let mlbMatch = url.match(/ML[A-Z]-\d+/i);
+                
+                // Se não encontrou, pode ser um link encurtado/afiliado
+                if (!mlbMatch) {
+                    console.log('Link de afiliado detectado, buscando produto...');
+                    
+                    try {
+                        // Tenta fazer requisição para seguir redirecionamento
+                        const response = await fetch(url, { 
+                            method: 'HEAD',
+                            redirect: 'follow'
+                        });
+                        
+                        // Pega a URL final após redirecionamentos
+                        const finalUrl = response.url;
+                        console.log('URL final:', finalUrl);
+                        
+                        mlbMatch = finalUrl.match(/ML[A-Z]-\d+/i);
+                    } catch (error) {
+                        console.log('Erro ao seguir redirecionamento, tentando método alternativo');
+                    }
+                }
+                
+                // Se ainda não encontrou, tenta buscar via iframe/fetch do conteúdo
+                if (!mlbMatch) {
+                    try {
+                        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+                        const html = await response.text();
+                        mlbMatch = html.match(/ML[A-Z]-\d+/i);
+                        
+                        if (mlbMatch) {
+                            console.log('Código encontrado no conteúdo da página');
+                        }
+                    } catch (error) {
+                        console.log('Não foi possível extrair código do link');
+                    }
+                }
                 
                 if (!mlbMatch) {
-                    imagemStatus.textContent = '⚠️ Não encontrei o código do produto. Cole a URL da imagem manualmente.';
+                    imagemStatus.textContent = '⚠️ Não consegui encontrar o produto. Verifique o link de afiliado.';
                     imagemStatus.style.color = '#ff6b6b';
                     return;
                 }
@@ -502,12 +538,12 @@
                     imagemStatus.textContent = '✅ Imagem encontrada!';
                     imagemStatus.style.color = '#4CAF50';
                 } else {
-                    imagemStatus.textContent = '⚠️ Produto sem imagem. Cole a URL manualmente.';
+                    imagemStatus.textContent = '⚠️ Produto sem imagem disponível.';
                     imagemStatus.style.color = '#ff6b6b';
                 }
             } catch (error) {
                 console.error('Erro ao buscar no Mercado Livre:', error);
-                imagemStatus.textContent = '⚠️ Erro ao buscar imagem. Cole a URL manualmente.';
+                imagemStatus.textContent = '⚠️ Erro ao buscar produto. Tente novamente.';
                 imagemStatus.style.color = '#ff6b6b';
             }
         }
