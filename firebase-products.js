@@ -61,16 +61,9 @@ function renderizarCategoria(categoriaId, produtos) {
 function criarCardProduto(produto, index) {
     const classeCaixa = `caixa-iten${(index % 5) + 1}`;
     
-    let conteudo;
-    if (produto.imagem) {
-        conteudo = `<img src="${produto.imagem}" alt="${produto.nome}">`;
-    } else {
-        conteudo = `<h2>${produto.emoji || '📦'}</h2>`;
-    }
-
     return `
         <a href="${produto.link}" target="_blank" rel="noopener" class="${classeCaixa}">
-            ${conteudo}
+            <img src="${produto.imagem}" alt="${produto.nome}">
             <h3>${produto.nome}</h3>
         </a>
     `;

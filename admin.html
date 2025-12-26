@@ -383,16 +383,11 @@
 
                 <div class="form-group">
                     <label>URL da Imagem do Produto</label>
-                    <input type="url" id="urlImagem" placeholder="https://...">
-                    <small id="imagemStatus" style="color: #888; display: block; margin-top: 5px;">Opcional - se deixar vazio, vai usar emoji</small>
+                    <input type="url" id="urlImagem" placeholder="https://..." required>
+                    <small id="imagemStatus" style="color: #888; display: block; margin-top: 5px;">Cole o link da Amazon para buscar automaticamente</small>
                     <div id="previewImagem" style="margin-top: 10px; display: none;">
                         <img id="imgPreview" style="max-width: 200px; border-radius: 8px; border: 2px solid #C9A961;" alt="Preview">
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Emoji (se não tiver imagem)</label>
-                    <input type="text" id="emoji" placeholder="Ex: 💻" maxlength="2">
                 </div>
 
                 <input type="hidden" id="produtoId" value="">
@@ -598,7 +593,6 @@
                 nome: document.getElementById('nomeProduto').value,
                 link: document.getElementById('linkAfiliado').value,
                 imagem: document.getElementById('urlImagem').value,
-                emoji: document.getElementById('emoji').value,
                 adicionadoPor: auth.currentUser.displayName || auth.currentUser.email,
                 timestamp: Date.now()
             };
@@ -627,7 +621,7 @@
                 formProduct.reset();
                 previewImagem.style.display = 'none';
                 produtoIdInput.value = '';
-                imagemStatus.textContent = 'Opcional - se deixar vazio, vai usar emoji';
+                imagemStatus.textContent = 'Cole o link da Amazon para buscar automaticamente';
                 imagemStatus.style.color = '#888';
             } catch (error) {
                 alert('Erro ao salvar produto: ' + error.message);
@@ -655,9 +649,7 @@
                         games: 'Games'
                     }[produto.categoria] || produto.categoria;
 
-                    const media = produto.imagem 
-                        ? `<img src="${produto.imagem}" alt="${produto.nome}">`
-                        : `<div class="emoji-display">${produto.emoji || '📦'}</div>`;
+                    const media = `<img src="${produto.imagem}" alt="${produto.nome}">`;
 
                     html += `
                         <div class="produto-item" data-id="${id}">
@@ -667,7 +659,7 @@
                                 <small>Adicionado por: ${produto.adicionadoPor}</small>
                             </div>
                             <div class="produto-acoes">
-                                <button class="btn-editar" data-id="${id}" data-categoria="${produto.categoria}" data-nome="${produto.nome}" data-link="${produto.link}" data-imagem="${produto.imagem || ''}" data-emoji="${produto.emoji || ''}">✏️ Editar</button>
+                                <button class="btn-editar" data-id="${id}" data-categoria="${produto.categoria}" data-nome="${produto.nome}" data-link="${produto.link}" data-imagem="${produto.imagem || ''}">✏️ Editar</button>
                                 <button class="btn-excluir" data-id="${id}" data-nome="${produto.nome}">🗑️ Excluir</button>
                             </div>
                         </div>
@@ -684,8 +676,7 @@
                             categoria: this.getAttribute('data-categoria'),
                             nome: this.getAttribute('data-nome'),
                             link: this.getAttribute('data-link'),
-                            imagem: this.getAttribute('data-imagem'),
-                            emoji: this.getAttribute('data-emoji')
+                            imagem: this.getAttribute('data-imagem')
                         };
                         editarProduto(id, produto);
                     });
@@ -709,7 +700,6 @@
             document.getElementById('nomeProduto').value = produto.nome;
             document.getElementById('linkAfiliado').value = produto.link;
             document.getElementById('urlImagem').value = produto.imagem || '';
-            document.getElementById('emoji').value = produto.emoji || '';
 
             // Mostrar preview se tiver imagem
             if (produto.imagem) {
@@ -750,7 +740,7 @@
             btnCancelar.style.display = 'none';
             formProduct.reset();
             previewImagem.style.display = 'none';
-            imagemStatus.textContent = 'Opcional - se deixar vazio, vai usar emoji';
+            imagemStatus.textContent = 'Cole o link da Amazon para buscar automaticamente';
             imagemStatus.style.color = '#888';
         }
 
