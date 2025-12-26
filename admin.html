@@ -479,6 +479,41 @@
             try {
                 imagemStatus.textContent = '🔍 Extraindo imagem da página...';
                 
+                // Usa o backend local para extrair a imagem
+                const response = await fetch('http://localhost:3000/api/extract-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+                
+                if (data.success && data.imageUrl) {
+                    console.log('Imagem encontrada via backend:', data.imageUrl);
+                    
+                    urlImagemInput.value = data.imageUrl;
+                    imgPreview.src = data.imageUrl;
+                    previewImagem.style.display = 'block';
+                    imagemStatus.textContent = '✅ Imagem encontrada!';
+                    imagemStatus.style.color = '#4CAF50';
+                } else {
+                    imagemStatus.textContent = '⚠️ Cole a URL da imagem manualmente';
+                    imagemStatus.style.color = '#ff6b6b';
+                }
+            } catch (error) {
+                console.error('Erro ao buscar via backend:', error);
+                // Fallback para método antigo se backend não estiver rodando
+                await buscarImagemOpenGraphFallback(url);
+            }
+        }
+
+        // Fallback caso o backend não esteja rodando
+        async function buscarImagemOpenGraphFallback(url) {
+            try {
+                imagemStatus.textContent = '🔍 Tentando método alternativo...';
+                
                 // Usa proxy CORS para buscar o HTML da página
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
                 const response = await fetch(proxyUrl);
