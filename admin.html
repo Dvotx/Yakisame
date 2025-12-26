@@ -378,16 +378,16 @@
                 <div class="form-group">
                     <label>Link de Afiliado</label>
                     <input type="url" id="linkAfiliado" placeholder="https://..." required>
-                    <small style="color: #888; display: block; margin-top: 5px;">Cole qualquer link de afiliado</small>
-                </div>
-
-                <div class="form-group">
-                    <label>URL da Imagem do Produto</label>
-                    <input type="url" id="urlImagem" placeholder="https://..." required>
-                    <small id="imagemStatus" style="color: #888; display: block; margin-top: 5px;">Cole a URL da imagem do produto</small>
+                    <small id="imagemStatus" style="color: #888; display: block; margin-top: 5px;">Cole o link e a imagem será buscada automaticamente</small>
                     <div id="previewImagem" style="margin-top: 10px; display: none;">
                         <img id="imgPreview" style="max-width: 200px; border-radius: 8px; border: 2px solid #C9A961;" alt="Preview">
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label>URL da Imagem (opcional)</label>
+                    <input type="url" id="urlImagem" placeholder="Cole se a busca automática falhar">
+                    <small style="color: #666; display: block; margin-top: 5px;">Só preencha se a imagem não for encontrada automaticamente</small>
                 </div>
 
                 <input type="hidden" id="produtoId" value="">
@@ -452,26 +452,81 @@
         // Função para buscar imagem do produto
         async function buscarImagemProduto(url) {
             try {
-                imagemStatus.textContent = '🔍 Tentando buscar imagem...';
+                imagemStatus.textContent = '🔍 Buscando imagem...';
                 imagemStatus.style.color = '#C9A961';
 
                 // Detecta Mercado Livre
                 if (url.includes('mercadolivre') || url.includes('mercadolibre') || url.includes('mlb')) {
-                    buscarImagemMercadoLivre(url);
+                    await buscarImagemMercadoLivre(url);
                 } 
                 // Detecta Amazon
                 else if (url.includes('amazon')) {
-                    buscarImagemAmazon(url);
+                    await buscarImagemAmazon(url);
                 } 
-                // Outros links - apenas mostra mensagem
+                // Qualquer outro link - faz scraping das meta tags (como WhatsApp)
                 else {
-                    imagemStatus.textContent = 'ℹ️ Cole a URL da imagem do produto manualmente abaixo';
-                    imagemStatus.style.color = '#888';
+                    await buscarImagemOpenGraph(url);
                 }
             } catch (error) {
-                imagemStatus.textContent = 'ℹ️ Cole a URL da imagem do produto manualmente';
+                imagemStatus.textContent = 'ℹ️ Cole a URL da imagem manualmente';
                 imagemStatus.style.color = '#888';
                 console.error('Erro:', error);
+            }
+        }
+
+        // Buscar imagem via Open Graph (como WhatsApp faz)
+        async function buscarImagemOpenGraph(url) {
+            try {
+                imagemStatus.textContent = '🔍 Extraindo imagem da página...';
+                
+                // Usa proxy CORS para buscar o HTML da página
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                const html = data.contents;
+                
+                // Busca meta tags de imagem (Open Graph, Twitter Card, etc.)
+                const patterns = [
+                    /<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i,
+                    /<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']/i,
+                    /<meta\s+name=["']twitter:image["']\s+content=["']([^"']+)["']/i,
+                    /<meta\s+content=["']([^"']+)["']\s+name=["']twitter:image["']/i,
+                    /<meta\s+itemprop=["']image["']\s+content=["']([^"']+)["']/i,
+                    /<link\s+rel=["']image_src["']\s+href=["']([^"']+)["']/i
+                ];
+                
+                let imagemUrl = null;
+                for (const pattern of patterns) {
+                    const match = html.match(pattern);
+                    if (match && match[1]) {
+                        imagemUrl = match[1];
+                        console.log('Imagem encontrada via meta tag:', imagemUrl);
+                        break;
+                    }
+                }
+                
+                if (imagemUrl) {
+                    // Corrige URL relativa se necessário
+                    if (imagemUrl.startsWith('//')) {
+                        imagemUrl = 'https:' + imagemUrl;
+                    } else if (imagemUrl.startsWith('/')) {
+                        const urlObj = new URL(url);
+                        imagemUrl = urlObj.origin + imagemUrl;
+                    }
+                    
+                    urlImagemInput.value = imagemUrl;
+                    imgPreview.src = imagemUrl;
+                    previewImagem.style.display = 'block';
+                    imagemStatus.textContent = '✅ Imagem encontrada!';
+                    imagemStatus.style.color = '#4CAF50';
+                } else {
+                    imagemStatus.textContent = '⚠️ Cole a URL da imagem manualmente';
+                    imagemStatus.style.color = '#ff6b6b';
+                }
+            } catch (error) {
+                console.error('Erro ao buscar Open Graph:', error);
+                imagemStatus.textContent = '⚠️ Cole a URL da imagem manualmente';
+                imagemStatus.style.color = '#ff6b6b';
             }
         }
 
@@ -631,7 +686,7 @@
         linkAfiliadoInput.addEventListener('paste', (e) => {
             setTimeout(() => {
                 const url = linkAfiliadoInput.value;
-                if (url && (url.includes('mercadolivre') || url.includes('amazon'))) {
+                if (url && url.startsWith('http')) {
                     buscarImagemProduto(url);
                 }
             }, 100);
@@ -640,8 +695,8 @@
         // Buscar imagem quando o link for digitado
         linkAfiliadoInput.addEventListener('input', (e) => {
             const url = e.target.value;
-            // Só busca automaticamente se for Mercado Livre ou Amazon
-            if (url.startsWith('http') && url.length > 20 && (url.includes('mercadolivre') || url.includes('amazon'))) {
+            // Busca automaticamente para qualquer URL válida
+            if (url.startsWith('http') && url.length > 20) {
                 clearTimeout(linkAfiliadoInput.searchTimeout);
                 linkAfiliadoInput.searchTimeout = setTimeout(() => {
                     buscarImagemProduto(url);
