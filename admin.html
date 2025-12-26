@@ -455,54 +455,72 @@
                 imagemStatus.textContent = '🔍 Buscando imagem...';
                 imagemStatus.style.color = '#C9A961';
 
-                // Extrai ASIN da Amazon
-                const asinMatch = url.match(/\/dp\/([A-Z0-9]{10})|\/product\/([A-Z0-9]{10})|\/gp\/product\/([A-Z0-9]{10})/);
+                // Tenta vários padrões de ASIN da Amazon
+                const patterns = [
+                    /\/dp\/([A-Z0-9]{10})/,
+                    /\/product\/([A-Z0-9]{10})/,
+                    /\/gp\/product\/([A-Z0-9]{10})/,
+                    /\/d\/([A-Z0-9]{10})/,
+                    /ASIN[=:]([A-Z0-9]{10})/i,
+                    /\/([A-Z0-9]{10})(?:\/|\?|$)/
+                ];
+
+                let asin = null;
+                for (const pattern of patterns) {
+                    const match = url.match(pattern);
+                    if (match) {
+                        asin = match[1];
+                        break;
+                    }
+                }
                 
-                if (asinMatch) {
-                    const asin = asinMatch[1] || asinMatch[2] || asinMatch[3];
-                    // Formato padrão de imagem da Amazon
-                    const imageUrl = `https://m.media-amazon.com/images/I/${asin}._AC_SL1500_.jpg`;
+                if (asin) {
+                    console.log('ASIN encontrado:', asin);
                     
-                    // Testa se a imagem existe
-                    const img = new Image();
-                    img.onload = function() {
-                        urlImagemInput.value = imageUrl;
-                        imgPreview.src = imageUrl;
-                        previewImagem.style.display = 'block';
-                        imagemStatus.textContent = '✅ Imagem encontrada!';
-                        imagemStatus.style.color = '#4CAF50';
-                    };
-                    img.onerror = function() {
-                        // Tenta formato alternativo
-                        tentarFormatoAlternativo(asin);
-                    };
-                    img.src = imageUrl;
+                    // Tenta múltiplos formatos de URL de imagem da Amazon
+                    const imageFormats = [
+                        `https://m.media-amazon.com/images/I/${asin}._AC_SL1500_.jpg`,
+                        `https://images-na.ssl-images-amazon.com/images/I/${asin}._AC_UL1500_.jpg`,
+                        `https://m.media-amazon.com/images/I/${asin}._AC_SX679_.jpg`,
+                        `https://images-na.ssl-images-amazon.com/images/I/${asin}._SL1000_.jpg`
+                    ];
+                    
+                    tentarCarregarImagem(imageFormats, 0);
                 } else {
-                    imagemStatus.textContent = 'ℹ️ Cole a URL da imagem manualmente';
-                    imagemStatus.style.color = '#888';
+                    imagemStatus.textContent = '⚠️ Não encontrei o código do produto. Cole a URL da imagem manualmente.';
+                    imagemStatus.style.color = '#ff6b6b';
                 }
             } catch (error) {
-                imagemStatus.textContent = '⚠️ Não foi possível buscar a imagem automaticamente';
+                imagemStatus.textContent = '⚠️ Erro ao buscar imagem';
                 imagemStatus.style.color = '#ff6b6b';
+                console.error('Erro:', error);
             }
         }
 
-        function tentarFormatoAlternativo(asin) {
-            // Tenta padrão de thumbnail
-            const altUrl = `https://images-na.ssl-images-amazon.com/images/I/${asin}._AC_UL1500_.jpg`;
+        function tentarCarregarImagem(urls, index) {
+            if (index >= urls.length) {
+                imagemStatus.textContent = '⚠️ Não consegui carregar a imagem. Cole a URL manualmente.';
+                imagemStatus.style.color = '#ff6b6b';
+                return;
+            }
+
             const img = new Image();
             img.onload = function() {
-                urlImagemInput.value = altUrl;
-                imgPreview.src = altUrl;
+                urlImagemInput.value = urls[index];
+                imgPreview.src = urls[index];
                 previewImagem.style.display = 'block';
                 imagemStatus.textContent = '✅ Imagem encontrada!';
                 imagemStatus.style.color = '#4CAF50';
             };
             img.onerror = function() {
-                imagemStatus.textContent = '⚠️ Cole a URL da imagem manualmente';
-                imagemStatus.style.color = '#ff6b6b';
+                console.log('Tentativa falhou:', urls[index]);
+                tentarCarregarImagem(urls, index + 1);
             };
-            img.src = altUrl;
+            img.src = urls[index];
+        }
+
+        function tentarFormatoAlternativo(asin) {
+            // Função removida - agora usa tentarCarregarImagem
         }
 
         // Buscar imagem quando o link for colado
