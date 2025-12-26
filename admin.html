@@ -782,6 +782,12 @@
         formProduct.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Verifica se tem imagem
+            if (!urlImagemInput.value) {
+                alert('⚠️ Aguarde a busca automática da imagem ou cole a URL manualmente!');
+                return;
+            }
+
             const produto = {
                 categoria: document.getElementById('categoria').value,
                 nome: document.getElementById('nomeProduto').value,
