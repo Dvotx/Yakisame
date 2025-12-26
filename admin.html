@@ -455,18 +455,8 @@
                 imagemStatus.textContent = '🔍 Buscando imagem...';
                 imagemStatus.style.color = '#C9A961';
 
-                // Detecta Mercado Livre
-                if (url.includes('mercadolivre') || url.includes('mercadolibre') || url.includes('mlb')) {
-                    await buscarImagemMercadoLivre(url);
-                } 
-                // Detecta Amazon
-                else if (url.includes('amazon')) {
-                    await buscarImagemAmazon(url);
-                } 
-                // Qualquer outro link - faz scraping das meta tags (como WhatsApp)
-                else {
-                    await buscarImagemOpenGraph(url);
-                }
+                // Usa o backend para todos os links (ele detecta automaticamente)
+                await buscarImagemOpenGraph(url);
             } catch (error) {
                 imagemStatus.textContent = 'ℹ️ Cole a URL da imagem manualmente';
                 imagemStatus.style.color = '#888';
