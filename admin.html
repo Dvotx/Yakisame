@@ -378,18 +378,13 @@
                 <div class="form-group">
                     <label>Link de Afiliado</label>
                     <input type="url" id="linkAfiliado" placeholder="https://..." required>
-                    <small style="color: #888; display: block; margin-top: 5px;">Cole o link do Mercado Livre e a imagem será buscada automaticamente</small>
-                </div>
-
-                <div class="form-group">
-                    <label>URL da Imagem do Produto</label>
-                    <input type="url" id="urlImagem" placeholder="https://..." required>
-                    <small id="imagemStatus" style="color: #888; display: block; margin-top: 5px;">Cole o link do Mercado Livre para buscar automaticamente</small>
+                    <small id="imagemStatus" style="color: #888; display: block; margin-top: 5px;">Cole o link do Mercado Livre</small>
                     <div id="previewImagem" style="margin-top: 10px; display: none;">
                         <img id="imgPreview" style="max-width: 200px; border-radius: 8px; border: 2px solid #C9A961;" alt="Preview">
                     </div>
                 </div>
 
+                <input type="hidden" id="urlImagem">
                 <input type="hidden" id="produtoId" value="">
                 <button type="submit" class="btn-submit" id="btnSubmit">Adicionar Produto</button>
                 <button type="button" class="btn-logout" id="btnCancelar" style="display: none; margin-top: 15px; width: 100%;">Cancelar Edição</button>
@@ -504,7 +499,7 @@
                     urlImagemInput.value = imagemUrl;
                     imgPreview.src = imagemUrl;
                     previewImagem.style.display = 'block';
-                    imagemStatus.textContent = '✅ Imagem encontrada do Mercado Livre!';
+                    imagemStatus.textContent = '✅ Imagem encontrada!';
                     imagemStatus.style.color = '#4CAF50';
                 } else {
                     imagemStatus.textContent = '⚠️ Produto sem imagem. Cole a URL manualmente.';
@@ -710,7 +705,7 @@
                 formProduct.reset();
                 previewImagem.style.display = 'none';
                 produtoIdInput.value = '';
-                imagemStatus.textContent = 'Cole o link do Mercado Livre para buscar automaticamente';
+                imagemStatus.textContent = 'Cole o link do Mercado Livre';
                 imagemStatus.style.color = '#888';
             } catch (error) {
                 alert('Erro ao salvar produto: ' + error.message);
@@ -829,7 +824,7 @@
             btnCancelar.style.display = 'none';
             formProduct.reset();
             previewImagem.style.display = 'none';
-            imagemStatus.textContent = 'Cole o link do Mercado Livre para buscar automaticamente';
+            imagemStatus.textContent = 'Cole o link do Mercado Livre';
             imagemStatus.style.color = '#888';
         }
 
