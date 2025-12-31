@@ -833,6 +833,9 @@
                 loginBox.classList.add('hidden');
                 adminPanel.classList.remove('hidden');
                 userName.textContent = user.displayName || user.email;
+                
+                // Carregar categorias quando autenticado
+                carregarCategoriasAdmin();
             } else {
                 loginBox.classList.remove('hidden');
                 adminPanel.classList.add('hidden');
@@ -849,8 +852,15 @@
                 return;
             }
 
+            const categoriaValue = document.getElementById('categoria').value;
+            
+            if (!categoriaValue) {
+                alert('⚠️ Selecione uma categoria!');
+                return;
+            }
+
             const produto = {
-                categoria: document.getElementById('categoria').value,
+                categoria: categoriaValue,
                 nome: document.getElementById('nomeProduto').value,
                 link: document.getElementById('linkAfiliado').value,
                 imagem: document.getElementById('urlImagem').value,
@@ -1127,12 +1137,34 @@
             }
             
             try {
-                await remove(ref(database, `categorias/${categoriaId}`));
-                await remove(ref(database, `produtos/${categoriaId}`));
+                // Buscar todos os produtos desta categoria
+                const produtosRef = ref(database, 'produtos');
+                const snapshot = await new Promise((resolve) => {
+                    onValue(produtosRef, resolve, { onlyOnce: true });
+                });
                 
-                successMessage.textContent = 'Categoria removida com sucesso!';
+                const produtosParaRemover = [];
+                if (snapshot.val()) {
+                    Object.entries(snapshot.val()).forEach(([id, produto]) => {
+                        if (produto.categoria === categoriaId) {
+                            produtosParaRemover.push(id);
+                        }
+                    });
+                }
+                
+                // Remover produtos da categoria
+                for (const produtoId of produtosParaRemover) {
+                    await remove(ref(database, `produtos/${produtoId}`));
+                }
+                
+                // Remover categoria
+                await remove(ref(database, `categorias/${categoriaId}`));
+                
+                successMessage.textContent = `Categoria removida com sucesso! (${produtosParaRemover.length} produtos deletados)`;
                 successMessage.classList.remove('hidden');
                 setTimeout(() => successMessage.classList.add('hidden'), 3000);
+                
+                carregarCategoriasAdmin();
             } catch (error) {
                 alert('Erro ao remover categoria: ' + error.message);
             }
