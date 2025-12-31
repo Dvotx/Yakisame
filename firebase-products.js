@@ -48,7 +48,7 @@ function renderizarContainersCategorias(categorias) {
     categoriasOrdenadas.forEach(([id, categoria]) => {
         const sectionHTML = `
             <section id="section-${id}">
-                <h2>${categoria.nome}</h2>
+                <h2 class="titulo-categoria">${categoria.nome}</h2>
                 <div class="container-produtos" id="container-${id}"></div>
             </section>
         `;
