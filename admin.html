@@ -873,12 +873,20 @@
                 
                 if (produtoId) {
                     // Editar produto existente
-                    await update(ref(database, `produtos/${produtoId}`), produto);
+                    // Para edição, é necessário saber a categoria original do produto
+                    // Aqui, vamos supor que o produtoId seja no formato categoriaId/produtoId
+                    const [categoriaId, prodId] = produtoId.split('/');
+                    if (categoriaId && prodId) {
+                        await update(ref(database, `produtos/${categoriaId}/${prodId}`), produto);
+                    } else {
+                        // fallback para estrutura antiga
+                        await update(ref(database, `produtos/${produtoId}`), produto);
+                    }
                     successMessage.textContent = 'Produto atualizado com sucesso!';
                     cancelarEdicao();
                 } else {
                     // Adicionar novo produto
-                    await push(ref(database, 'produtos'), produto);
+                    await push(ref(database, `produtos/${categoriaValue}`), produto);
                     successMessage.textContent = 'Produto adicionado com sucesso!';
                 }
                 
