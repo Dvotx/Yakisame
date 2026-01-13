@@ -94,4 +94,70 @@ function criarCardProduto(produto, index) {
 }
 
 // Carregar produtos quando a página carregar
-document.addEventListener('DOMContentLoaded', carregarCategorias);
+document.addEventListener('DOMContentLoaded', () => {
+    carregarCategorias();
+
+    // Função para ativar drag/scroll em todos os containers
+    function enableDragScroll(container) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        container.addEventListener('mousedown', (e) => {
+            isDown = true;
+            container.classList.add('dragging');
+            startX = e.pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        });
+        container.addEventListener('mouseleave', () => {
+            isDown = false;
+            container.classList.remove('dragging');
+        });
+        container.addEventListener('mouseup', () => {
+            isDown = false;
+            container.classList.remove('dragging');
+        });
+        container.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - container.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            container.scrollLeft = scrollLeft - walk;
+        });
+
+        // Touch
+        container.addEventListener('touchstart', (e) => {
+            isDown = true;
+            startX = e.touches[0].pageX - container.offsetLeft;
+            scrollLeft = container.scrollLeft;
+        });
+        container.addEventListener('touchend', () => {
+            isDown = false;
+        });
+        container.addEventListener('touchmove', (e) => {
+            if (!isDown) return;
+            const x = e.touches[0].pageX - container.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            container.scrollLeft = scrollLeft - walk;
+        });
+    }
+
+    // Ativa drag/scroll em todos os containers existentes
+    function ativarDragEmTodosContainers() {
+        document.querySelectorAll('.container-produtos').forEach(container => {
+            if (!container.hasAttribute('data-drag-enabled')) {
+                enableDragScroll(container);
+                container.setAttribute('data-drag-enabled', 'true');
+            }
+        });
+    }
+
+    // Observa mudanças no DOM para containers dinâmicos
+    const observer = new MutationObserver(() => {
+        ativarDragEmTodosContainers();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Ativa no carregamento inicial
+    setTimeout(ativarDragEmTodosContainers, 500);
+});
