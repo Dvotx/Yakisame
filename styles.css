@@ -442,6 +442,16 @@ body {
         -webkit-overflow-scrolling: touch;
         touch-action: pan-x;
         overscroll-behavior-x: contain;
+        min-width: 100vw;
+        width: auto;
+    }
+    .caixa-iten1,
+    .caixa-iten2,
+    .caixa-iten3,
+    .caixa-iten4,
+    .caixa-iten5 {
+        min-width: 220px !important;
+        width: 220px !important;
     }
     
     .secao-categoria {
