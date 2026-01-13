@@ -236,6 +236,8 @@ body {
 
 /* ===== CONTAINER DE PRODUTOS ===== */
 .container-produtos {
+        justify-content: flex-start;
+        padding-left: 16px;
     display: flex;
     gap: 20px;
     padding: 20px;
